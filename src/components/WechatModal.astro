@@ -57,6 +57,20 @@
       <span class="wechat-hint-step">②</span>
       <span>Follow <strong>汇知津</strong></span>
     </div>
+
+    <div class="wechat-divider"><span>or</span></div>
+
+    <a
+      class="wechat-x-link"
+      href="https://x.com/AZ_fanta"
+      target="_blank"
+      rel="noopener"
+    >
+      <svg class="wechat-x-icon" viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true">
+        <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+      </svg>
+      <span>Follow <strong>@AZ_fanta</strong> on X</span>
+    </a>
   </div>
 </div>
 
@@ -200,6 +214,58 @@
     font-weight: 600;
     flex-shrink: 0;
   }
+
+  /* Divider with 'or' label */
+  .wechat-divider {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    margin: 4px 0 2px;
+    color: var(--ink-4);
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .wechat-divider::before,
+  .wechat-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--glass-border);
+  }
+  .wechat-divider span {
+    padding: 0 12px;
+  }
+
+  /* X link inside modal */
+  .wechat-x-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 18px;
+    border-radius: var(--r-sm);
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    color: var(--ink-2);
+    font-size: 0.875rem;
+    text-decoration: none;
+    transition: all 0.18s ease;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+  .wechat-x-link:hover {
+    background: var(--glass-bg-strong);
+    border-color: var(--ink-4);
+    color: var(--ink);
+    transform: translateY(-1px);
+  }
+  .wechat-x-link strong { color: var(--ink); font-weight: 510; }
+  .wechat-x-icon {
+    flex-shrink: 0;
+    opacity: 0.85;
+  }
+  .wechat-x-link:hover .wechat-x-icon { opacity: 1; }
 </style>
 
 <script>
