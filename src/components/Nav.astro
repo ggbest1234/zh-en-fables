@@ -1,8 +1,12 @@
 ---
 import WechatModal from './WechatModal.astro';
+
 const path = Astro.url.pathname;
 const isActive = (href: string) =>
   href === '/' ? path === '/' : path.startsWith(href);
+
+const xHandle = '@AZ_fanta';
+const xUrl = 'https://x.com/AZ_fanta';
 ---
 
 <nav class="nav" transition:persist="nav">
@@ -17,7 +21,33 @@ const isActive = (href: string) =>
     <div class="nav-links">
       <a class={`nav-link ${isActive('/') ? 'is-active' : ''}`} href="/">Index</a>
       <a class={`nav-link ${isActive('/chapters') || path.startsWith('/chapter/') ? 'is-active' : ''}`} href="/#chapters">Chapters</a>
+      <a class="nav-link nav-link-x" href={xUrl} target="_blank" rel="noopener" aria-label={`Follow ${xHandle} on X`}>
+        <svg class="x-icon" viewBox="0 0 24 24" width="13" height="13" fill="currentColor" aria-hidden="true">
+          <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+        </svg>
+        <span>{xHandle}</span>
+      </a>
       <WechatModal />
     </div>
   </div>
 </nav>
+
+<style>
+  .nav-link-x {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    color: var(--ink-3);
+    text-decoration: none;
+  }
+  .nav-link-x:hover {
+    color: var(--ink);
+  }
+  .x-icon {
+    flex-shrink: 0;
+    opacity: 0.85;
+  }
+  .nav-link-x:hover .x-icon { opacity: 1; }
+</style>
