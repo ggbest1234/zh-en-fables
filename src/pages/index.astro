@@ -1,0 +1,89 @@
+---
+import Base from '../layouts/Base.astro';
+import ChapterCard from '../components/ChapterCard.astro';
+import chapters from '../data/chapters.json';
+
+// 2 featured: chapter 2 and chapter 3 (the most universal)
+const featured = [chapters[1], chapters[2]];
+---
+
+<Base>
+  <!-- HERO -->
+  <section class="hero" id="top">
+    <div class="hero-watermark" aria-hidden="true">智</div>
+    <div class="container hero-inner">
+      <div class="hero-eyebrow reveal">
+        <span class="hero-eyebrow-dot"></span>
+        <span>20 fables · 2 civilizations · 1 conversation</span>
+      </div>
+
+      <h1 class="display hero-title reveal">
+        <span class="line"><span class="zh">中国寓言</span>，</span>
+        <span class="line"><span class="en">English Wisdom</span>.</span>
+      </h1>
+
+      <p class="hero-tagline reveal">
+        Stories that crossed centuries and oceans to teach the same things
+        twice. The snake and the lily. The arrow and the stone. Two ways of
+        saying what every civilization already knew.
+      </p>
+
+      <div class="hero-cta reveal">
+        <a href="#chapters" class="btn btn-primary">Start reading →</a>
+        <a href={`/chapter/${chapters[0].slug}/`} class="btn">Read first fable</a>
+      </div>
+
+      <div class="hero-stats stagger">
+        <div class="hero-stat">
+          <div class="hero-stat-label">// Chapters</div>
+          <div class="hero-stat-value"><span class="num">20</span> paired fables</div>
+        </div>
+        <div class="hero-stat">
+          <div class="hero-stat-label">// Civilizations</div>
+          <div class="hero-stat-value"><span class="num">2</span> in dialogue</div>
+        </div>
+        <div class="hero-stat">
+          <div class="hero-stat-label">// Centuries</div>
+          <div class="hero-stat-value"><span class="num">2,500+</span> of wisdom</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURED -->
+  <section class="featured">
+    <div class="container">
+      <div class="section-eyebrow reveal">Featured pairings</div>
+      <div class="featured-strip stagger">
+        {featured.map((c) => (
+          <a class={`featured-card ${c.num % 2 === 0 ? 'en-side' : ''}`} href={`/chapter/${c.slug}/`}>
+            <div class="meta">Chapter {String(c.num).padStart(2, '0')}</div>
+            <div class="zh-title">{c.titleZh}</div>
+            <div class="en-title">{c.titleEn}</div>
+            {c.sections?.Moral && (
+              <p class="quote">
+                "{c.sections.Moral.split('\n')[0].replace(/^"|"$/g, '').slice(0, 140)}…"
+              </p>
+            )}
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- CHAPTER GRID -->
+  <section id="chapters">
+    <div class="container">
+      <div class="section-eyebrow reveal">The full collection</div>
+      <h2 class="reveal" style="max-width: 22ch; margin-bottom: var(--s-12);">
+        Twenty pairings, ordered by when the wisdom first showed up.
+      </h2>
+
+      <div class="chapter-grid stagger">
+        {chapters.map((c, i) => (
+          <ChapterCard chapter={c} index={i} />
+        ))}
+      </div>
+    </div>
+  </section>
+</Base>

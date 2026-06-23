@@ -1,0 +1,202 @@
+---
+import Base from '../../layouts/Base.astro';
+import chapters from '../../data/chapters.json';
+import type { GetStaticPaths } from 'astro';
+
+export const getStaticPaths: GetStaticPaths = () => {
+  return chapters.map((c) => ({
+    params: { slug: c.slug },
+  }));
+};
+
+const { slug } = Astro.params;
+const idx = chapters.findIndex((c) => c.slug === slug);
+const chapter = chapters[idx];
+if (!chapter) throw new Error(`Chapter not found: ${slug}`);
+
+const next = chapters[(idx + 1) % chapters.length];
+const prev = chapters[(idx - 1 + chapters.length) % chapters.length];
+
+const reflection = chapter.sections['Cross-Cultural Reflection'] ?? '';
+const moral = chapter.sections['Moral'] ?? '';
+const story = chapter.sections['Story'] ?? '';
+const english = chapter.sections['English Equivalent'] ?? '';
+const notes = chapter.sections['Notes'] ?? '';
+
+// Split the "In Chinese / In English / In life" refrain (last 3 lines of reflection)
+const refLines = reflection.split('\n').filter((l) => l.trim());
+const refrainLines = refLines.slice(-3);
+const reflectionBody = refLines.slice(0, -3).join('\n').trim();
+
+// Parse notes into numbered items: split on [N] markers
+const noteItems: { n: string; text: string }[] = [];
+const noteRaw = notes.split(/(?=\[\d+\])/).map((s) => s.trim()).filter(Boolean);
+for (const block of noteRaw) {
+  const m = block.match(/^\[(\d+)\]\s*([\s\S]*)$/);
+  if (m) {
+    noteItems.push({ n: m[1], text: m[2].trim() });
+  } else if (block) {
+    noteItems.push({ n: '·', text: block });
+  }
+}
+
+// Split paragraphs
+const splitP = (s: string) => s.split(/\n\n+/).map((p) => p.trim()).filter(Boolean);
+const paragraphsOf = (key: string) => splitP(chapter.sections[key] ?? '');
+
+const title = `Chapter ${chapter.num} · ${chapter.titleEn} · ${chapter.titleZh}`;
+const description = chapter.sections['Moral']?.split('\n')[0]?.slice(0, 160) || '';
+---
+
+<Base title={title} description={description} ogPath={`/chapter/${slug}/`}>
+  <!-- HERO -->
+  <section class="chapter-hero">
+    <div class="container">
+      <div class="chapter-eyebrow reveal">
+        <span class="num">Chapter {String(chapter.num).padStart(2, '0')}</span>
+        <span>/ 20 fables</span>
+        <span>·</span>
+        <a href="/#chapters" style="color: var(--ink-3);">← Back to index</a>
+      </div>
+
+      <div class="chapter-titles reveal">
+        <div class="zh-side">
+          <div class="label">中文 · Chinese</div>
+          <h1 class="zh-title">{chapter.titleZh}</h1>
+        </div>
+        <div class="en-side">
+          <div class="label">English · 英文</div>
+          <h2 class="en-title">{chapter.titleEn}</h2>
+        </div>
+      </div>
+
+      {refrainLines.length === 3 && (
+        <div class="refrain reveal">
+          {refrainLines.map((line) => {
+            const lower = line.toLowerCase();
+            if (lower.startsWith('in chinese')) {
+              return <div class="refrain-line zh"><span class="label">In Chinese</span><span class="text zh-body">{line.replace(/^In Chinese,?\s*we say:?\s*/i, '')}</span></div>;
+            } else if (lower.startsWith('in english')) {
+              return <div class="refrain-line en"><span class="label">In English</span><span class="text">{line.replace(/^In English,?\s*we say:?\s*/i, '')}</span></div>;
+            } else if (lower.startsWith('in life')) {
+              return <div class="refrain-line life"><span class="label">In life</span><span class="text">{line.replace(/^In life,?\s*we say:?\s*/i, '')}</span></div>;
+            } else {
+              return <div class="refrain-line"><span class="label">—</span><span class="text">{line}</span></div>;
+            }
+          })}
+        </div>
+      )}
+    </div>
+  </section>
+
+  <!-- STORY -->
+  <section class="section-block story">
+    <div class="container">
+      <div class="section-block-header reveal">
+        <span class="section-block-num">01</span>
+        <span class="section-block-title">Story</span>
+        <span class="section-block-en">故事</span>
+      </div>
+      <div class="section-block-body stagger">
+        {paragraphsOf('Story').map((p) => <p class="zh-body">{p}</p>)}
+      </div>
+    </div>
+  </section>
+
+  <!-- MORAL -->
+  <section class="section-block moral">
+    <div class="container">
+      <div class="section-block-header reveal">
+        <span class="section-block-num">02</span>
+        <span class="section-block-title">Moral</span>
+        <span class="section-block-en">寓意</span>
+      </div>
+      <div class="section-block-body stagger">
+        {paragraphsOf('Moral').map((p) => <p class="zh-body">{p}</p>)}
+      </div>
+    </div>
+  </section>
+
+  <!-- ENGLISH EQUIVALENT -->
+  <section class="section-block english">
+    <div class="container">
+      <div class="section-block-header reveal">
+        <span class="section-block-num">03</span>
+        <span class="section-block-title">English Equivalent</span>
+        <span class="section-block-en">对译</span>
+      </div>
+      <div class="section-block-body stagger">
+        {paragraphsOf('English Equivalent').map((p) => <p>{p}</p>)}
+      </div>
+    </div>
+  </section>
+
+  <!-- CROSS-CULTURAL REFLECTION -->
+  <section class="section-block reflection">
+    <div class="container">
+      <div class="section-block-header reveal">
+        <span class="section-block-num">04</span>
+        <span class="section-block-title">Cross-Cultural Reflection</span>
+        <span class="section-block-en">对照</span>
+      </div>
+      {reflectionBody && (
+        <div class="section-block-body stagger">
+          {reflectionBody.split(/\n\n+/).map((p) => p.trim()).filter(Boolean).map((p) => <p>{p}</p>)}
+        </div>
+      )}
+    </div>
+  </section>
+
+  <!-- NOTES -->
+  {noteItems.length > 0 && (
+    <section class="section-block notes">
+      <div class="container">
+        <div class="section-block-header reveal">
+          <span class="section-block-num">05</span>
+          <span class="section-block-title">Notes</span>
+          <span class="section-block-en">注释</span>
+        </div>
+        <div class="notes-list stagger">
+          {noteItems.map((item) => (
+            <div class="note-item">
+              <span class="marker">[{item.n}]</span>
+              <div class="text">
+                {/* Highlight title in bold if it appears before the first colon */}
+                {(() => {
+                  const colonIdx = item.text.indexOf(':');
+                  if (colonIdx > 0 && colonIdx < 80) {
+                    return (
+                      <>
+                        <strong>{item.text.slice(0, colonIdx)}</strong>
+                        {item.text.slice(colonIdx)}
+                      </>
+                    );
+                  }
+                  return item.text;
+                })()}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  )}
+
+  <!-- PREV / NEXT -->
+  <section>
+    <div class="container">
+      <div class="chapter-nav">
+        <a href={`/chapter/${prev.slug}/`}>
+          <span class="label">← Previous</span>
+          <span class="zh">{prev.titleZh}</span>
+          <span class="title">{prev.titleEn}</span>
+        </a>
+        <a href={`/chapter/${next.slug}/`} class="is-next">
+          <span class="label">Next →</span>
+          <span class="zh">{next.titleZh}</span>
+          <span class="title">{next.titleEn}</span>
+        </a>
+      </div>
+    </div>
+  </section>
+</Base>

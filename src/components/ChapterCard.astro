@@ -1,0 +1,33 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import chapters from '../data/chapters.json';
+
+interface Props {
+  chapter: typeof chapters[number];
+  index?: number;
+  showBlurb?: boolean;
+}
+
+const { chapter, index = 0, showBlurb = true } = Astro.props;
+const cardAccent = index % 2 === 0 ? 'var(--accent-zh)' : 'var(--accent-en)';
+const cardGlow = index % 2 === 0 ? 'var(--accent-zh-glow)' : 'var(--accent-en-glow)';
+---
+
+<a
+  class="chapter-card reveal"
+  href={`/chapter/${chapter.slug}/`}
+  style={`--card-accent: ${cardAccent}; --card-glow: ${cardGlow};`}
+>
+  <div class="chapter-num">Chapter {String(chapter.num).padStart(2, '0')}</div>
+  <div class="chapter-zh">{chapter.titleZh}</div>
+  <div class="chapter-en">{chapter.titleEn}</div>
+  {showBlurb && chapter.sections?.Story && (
+    <p class="chapter-blurb">
+      {chapter.sections.Story.split('\n').filter(s => s.trim())[0]?.slice(0, 180) + '…'}
+    </p>
+  )}
+  <div class="chapter-foot">
+    <span>Read fable</span>
+    <span class="arrow">→</span>
+  </div>
+</a>
