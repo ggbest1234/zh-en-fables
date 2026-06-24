@@ -3,6 +3,7 @@ import '../styles/global.css';
 import { ViewTransitions } from 'astro:transitions';
 import Nav from '../components/Nav.astro';
 import Footer from '../components/Footer.astro';
+import CookieBanner from '../components/CookieBanner.astro';
 
 interface Props {
   title?: string;
@@ -17,6 +18,7 @@ const {
 } = Astro.props;
 
 const canonicalURL = new URL(ogPath, Astro.site).toString();
+const GA4_ID = 'G-XXXXXXXXXX'; // ← Replace with your real GA4 Measurement ID
 ---
 
 <!doctype html>
@@ -50,6 +52,29 @@ const canonicalURL = new URL(ogPath, Astro.site).toString();
     <title>{title}</title>
 
     <ViewTransitions />
+
+    {/* Google Analytics 4 — loaded only after user accepts cookies.
+        The check is inline because gtag's consent mode treats denies as
+        "analytics_storage: denied" and we never even load the script until
+        localStorage says 'accepted'. */}
+    <script is:inline define:vars={{ GA4_ID }}>
+      (function () {
+        try {
+          if (localStorage.getItem('cookie-consent') !== 'accepted') return;
+          // Inject the GA4 loader
+          var s = document.createElement('script');
+          s.async = true;
+          s.src = 'https://www.googletagmanager.com/gtag/js?id=' + GA4_ID;
+          document.head.appendChild(s);
+          // gtag stub
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){ dataLayer.push(arguments); }
+          window.gtag = gtag;
+          gtag('js', new Date());
+          gtag('config', GA4_ID, { anonymize_ip: true });
+        } catch (e) { /* localStorage blocked, fail silently */ }
+      })();
+    </script>
   </head>
   <body>
     <Nav />
@@ -57,6 +82,7 @@ const canonicalURL = new URL(ogPath, Astro.site).toString();
       <slot />
     </main>
     <Footer />
+    <CookieBanner />
 
     <script>
       // Reveal-on-scroll: generous rootMargin so all elements render on first load,

@@ -1,0 +1,134 @@
+---
+// Cookie consent banner.
+// - Default: blocked (GDPR / ePrivacy friendly).
+// - "Accept" → enables GA4 by setting a localStorage flag and reloading the page
+//   so the GA4 script can be loaded by the inline bootstrap in Base.astro.
+// - "Decline" → keeps the flag as 'declined' and hides the banner.
+// - Once a choice is made, the banner stays hidden.
+
+const choice = 'pending'; // 'pending' | 'accepted' | 'declined'
+---
+
+<div
+  id="cookie-banner"
+  class="cookie-banner"
+  role="dialog"
+  aria-labelledby="cookie-banner-title"
+  hidden
+>
+  <div class="cookie-banner-inner glass">
+    <div class="cookie-banner-text">
+      <strong id="cookie-banner-title">Cookies & analytics</strong>
+      <p>
+        We use Google Analytics to understand which fables readers love.
+        No personal data, no ads — just counts of which stories get read.
+      </p>
+    </div>
+    <div class="cookie-banner-actions">
+      <button type="button" class="btn btn-ghost btn-sm" data-cookie-choice="declined">
+        Decline
+      </button>
+      <button type="button" class="btn btn-primary btn-sm" data-cookie-choice="accepted">
+        Accept
+      </button>
+    </div>
+  </div>
+</div>
+
+<style>
+  .cookie-banner {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 90;
+    padding: var(--s-4);
+    display: flex;
+    justify-content: center;
+    pointer-events: none;
+    animation: cookie-slide 0.3s ease-out;
+  }
+  .cookie-banner[hidden] { display: none; }
+
+  @keyframes cookie-slide {
+    from { transform: translateY(20px); opacity: 0; }
+    to   { transform: translateY(0); opacity: 1; }
+  }
+
+  .cookie-banner-inner {
+    pointer-events: auto;
+    display: flex;
+    align-items: center;
+    gap: var(--s-5);
+    max-width: 720px;
+    width: 100%;
+    padding: var(--s-4) var(--s-5);
+  }
+
+  .cookie-banner-text {
+    flex: 1;
+    min-width: 0;
+  }
+  .cookie-banner-text strong {
+    display: block;
+    font-size: 0.875rem;
+    color: var(--ink);
+    margin-bottom: 2px;
+  }
+  .cookie-banner-text p {
+    font-size: 0.8125rem;
+    color: var(--ink-3);
+    line-height: 1.5;
+  }
+
+  .cookie-banner-actions {
+    display: flex;
+    gap: var(--s-2);
+    flex-shrink: 0;
+  }
+
+  @media (max-width: 560px) {
+    .cookie-banner-inner {
+      flex-direction: column;
+      align-items: stretch;
+      gap: var(--s-3);
+    }
+    .cookie-banner-actions { justify-content: flex-end; }
+  }
+</style>
+
+<script>
+  // Cookie consent logic.
+  // localStorage key: 'cookie-consent' → 'accepted' | 'declined'
+  // On accept, set the flag and reload so the GA4 script (gated on the flag
+  // in Base.astro) actually loads.
+  function initCookie() {
+    const banner = document.getElementById('cookie-banner');
+    if (!banner) return;
+
+    const choice = localStorage.getItem('cookie-consent');
+    if (choice === 'accepted' || choice === 'declined') {
+      banner.hidden = true;
+      return;
+    }
+
+    // Pending → show
+    banner.hidden = false;
+
+    banner.querySelectorAll<HTMLElement>('[data-cookie-choice]').forEach((btn) => {
+      if ((btn as any)._cookieBound) return;
+      (btn as any)._cookieBound = true;
+      btn.addEventListener('click', () => {
+        const value = btn.getAttribute('data-cookie-choice');
+        if (value === 'accepted' || value === 'declined') {
+          localStorage.setItem('cookie-consent', value);
+          // Reload so the GA4 loader (which checks the flag at script-eval time)
+          // can pick up the new state.
+          location.reload();
+        }
+      });
+    });
+  }
+  initCookie();
+  document.addEventListener('astro:page-load', initCookie);
+</script>
